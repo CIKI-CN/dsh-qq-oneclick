@@ -11,6 +11,8 @@
 
 把 DeepSeek Harness 接到 QQ，**双击 → 勾选 → 装完**，不需要命令行、不需要装 git。
 
+📖 **新手直接看：[使用教程 § 从零到在 QQ 里说话](docs/USAGE.md)** —— 从准备 NTQQ/SnowLuma/DSH 到在群里 @ 它一次，逐步截图级说明。
+
 ![安装向导 · 功能选择](docs/preview-wizard.png)
 
 ---

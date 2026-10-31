@@ -1,0 +1,39 @@
+MIT License
+
+Copyright (c) 2026 DSH一键式接入QQ contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## 本许可的覆盖范围（重要）
+
+本许可 **只覆盖本项目自己写的代码**（安装器、设置中心外壳、STT 实现、出处机制）。
+
+它 **不覆盖** 本项目安装、调用或链接的第三方组件，包括但不限于：
+
+- SurfCore（Mieksido/surfcore）——MIT，著作权行 `Copyright (c) 2026 Derpyu520 and
+  qq-bridge / QSH contributors`，本项目 **不随包分发其代码**；
+- SnowLuma —— 上游非商业许可，本项目只检测、引导，不打包、不代登录；
+- `@snowluma/sdk` / `@snowluma/mcp` —— 声明 `SEE LICENSE IN LICENSE` 但包内未附
+  LICENSE 文件，本项目只通过 npm 获取；
+- 语音引擎与模型、FFmpeg、以及第 8 节列出的其余组件。
+
+每一份组件的上游地址、作者、许可证与收录方式，见 `docs/third-party.json`
+（唯一真相源）与生成的 `NOTICE.md`。

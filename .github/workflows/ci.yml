@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.13'
+
+      # 出处闸门：任何第三方组件没登记、或 NOTICE.md 与 sources 不一致，这里就红
+      - name: 出处与许可闸门
+        run: node scripts/check-notice.mjs
+
+      # 语法：拦住「改了没跑」
+      - name: 语法检查
+        run: node scripts/check-syntax.mjs
+
+      # 构建：确认发布包能产出（不发布，只验证流程）
+      - name: 构建发布包
+        run: node scripts/build.mjs
+
+      - name: 产物大小
+        shell: pwsh
+        run: |
+          Get-ChildItem dist/*.zip | Select-Object Name, @{n='MB';e={[math]::Round($_.Length/1MB,1)}}

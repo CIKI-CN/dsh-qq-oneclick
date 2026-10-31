@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DSH一键式接入QQ · 安装向导</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <strong>DSH一键式接入QQ</strong>
+      <span class="badge">非官方安装器</span>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <div class="layout">
+    <nav class="rail" id="rail"></nav>
+    <main class="panel" id="panel">
+      <div class="loading">正在读安装状态…</div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="hint" id="hint"></div>
+    <div class="actions">
+      <button class="btn ghost" id="btn-back">上一步</button>
+      <button class="btn primary" id="btn-next">下一步</button>
+    </div>
+  </footer>
+
+  <div class="disclaimer">
+    本工具与 SurfCore / qq-bridge / SnowLuma 的作者无隶属关系。程序本体的功劳属于上游作者；
+    我们不打包他们的代码，只按文档安装。
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

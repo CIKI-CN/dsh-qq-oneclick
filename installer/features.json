@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "note": "装时与上游 config.example.json 合并生成：上游新增的键归入「未分类」，不静默丢弃；上游删掉的键标灰并提示。本文件只维护语义（名称、依赖、来源、风险），不写死上游键。",
+  "presets": {
+    "min": {
+      "name": "最小",
+      "desc": "只要「能好好聊天」",
+      "items": ["B1", "B2", "B3", "B4", "B5", "B6", "C1", "E4"]
+    },
+    "recommended": {
+      "name": "推荐",
+      "desc": "像个人：加记忆、人格、表情、语音、额度",
+      "items": ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B10", "C1", "C2", "C3", "C4", "C5", "D2", "D3", "E4"]
+    },
+    "full": {
+      "name": "全量",
+      "desc": "全部打开（含语音转文字、主动找人、B站）",
+      "items": ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B10", "C1", "C2", "C3", "C4", "C5", "D1", "D2", "D3", "D4", "E1", "E2", "E4", "E5", "F4", "F7"]
+    }
+  },
+  "groups": [
+    {
+      "id": "A",
+      "name": "接入与身份",
+      "required": true,
+      "note": "这一组不能取消：没有它们，程序装上也收不到消息。",
+      "items": [
+        { "id": "A1", "name": "OneBot 网关接入与重连", "status": "have", "source": "snowluma", "default": "on", "download": "user-provided" },
+        { "id": "A2", "name": "桥接核心（收发/队列/单实例）", "status": "have", "source": "qq-bridge", "default": "on", "download": "" },
+        { "id": "A3", "name": "白名单 / 黑名单 / 空名单不放行", "status": "have", "source": "qq-bridge", "default": "on", "download": "" },
+        { "id": "A4", "name": "四种运行模式", "status": "have", "source": "qq-bridge", "default": "on", "download": "" },
+        { "id": "A5", "name": "管理员双身份 + 传话箱硬闸", "status": "have", "source": "qq-bridge", "default": "on", "download": "" }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "对话体验",
+      "required": false,
+      "items": [
+        { "id": "B1", "name": "引用回复 / 分条 / 拟人延迟", "status": "have", "source": "qq-bridge", "default": "on", "download": "" },
+        { "id": "B2", "name": "表情包（收藏·语义·推荐）", "status": "have", "source": "qq-bridge", "default": "on", "download": "" },
+        { "id": "B3", "name": "拍一拍", "status": "have", "source": "qq-bridge", "default": "on", "download": "" },
+        { "id": "B4", "name": "合并转发展开", "status": "have", "source": "qq-bridge", "default": "on", "download": "" },
+        { "id": "B5", "name": "图片/动图理解（视觉）", "status": "have", "source": "qq-bridge", "default": "on", "download": "" },
+        { "id": "B6", "name": "上线补历史", "status": "have", "source": "qq-bridge", "default": "on", "download": "" },
+        { "id": "B7", "name": "长消息转图片 / md→纯文本", "status": "have", "source": "qq-bridge", "default": "on", "download": "" },
+        { "id": "B8", "name": "语音条发送（TTS）", "status": "default-off", "source": "surfvoicelocal", "default": "off", "download": "model", "note": "模型数百 MB 起，装完再下载；默认关闭，开了才会真说话。" },
+        { "id": "B9", "name": "语音转文字（STT）", "status": "new", "source": "self", "default": "off", "download": "engine", "note": "本项目新增能力（上游没有）。需要 ffmpeg + 本地转写引擎，模型较大。" },
+        { "id": "B10", "name": "提问 / 审批回传", "status": "have", "source": "qq-bridge", "default": "on", "download": "" }
+      ]
+    },
+    {
+      "id": "C",
+      "name": "记忆与人格",
+      "required": false,
+      "items": [
+        { "id": "C1", "name": "衰减记忆卡（遗忘/告警/压缩）", "status": "have", "source": "surfcore", "default": "on", "download": "" },
+        { "id": "C2", "name": "角色包（多角色整包切换）", "status": "have", "source": "surfcore", "default": "on", "download": "" },
+        { "id": "C3", "name": "身份对齐", "status": "have", "source": "surfcore", "default": "on", "download": "" },
+        { "id": "C4", "name": "黑话学习", "status": "have", "source": "surfcore", "default": "on", "download": "", "note": "会把群里的陌生词当搜索关键词发出去，介意可关。" },
+        { "id": "C5", "name": "对话收尾", "status": "have", "source": "surfcore", "default": "on", "download": "" }
+      ]
+    },
+    {
+      "id": "D",
+      "name": "主动与运营",
+      "required": false,
+      "items": [
+        { "id": "D1", "name": "目的机制（主动找人）", "status": "have", "source": "surfcore", "default": "off", "download": "", "note": "会主动发消息，默认关闭，避免吓到你朋友。" },
+        { "id": "D2", "name": "安静时段 / 作息", "status": "have", "source": "surfcore", "default": "on", "download": "" },
+        { "id": "D3", "name": "token 额度与花费看板", "status": "have", "source": "surfcore", "default": "on", "download": "" },
+        { "id": "D4", "name": "定时问候", "status": "default-off", "source": "surfcore", "default": "off", "download": "" }
+      ]
+    },
+    {
+      "id": "E",
+      "name": "外部内容",
+      "required": false,
+      "items": [
+        { "id": "E1", "name": "B站（登录/看/评论/动态/分享）", "status": "have", "source": "surfcore", "default": "off", "download": "" },
+        { "id": "E2", "name": "B站直播弹幕监听", "status": "unknown", "source": "surfcore", "default": "off", "download": "", "note": "上游是否内置待确认；不确定的功能不承诺。" },
+        { "id": "E3", "name": "抖音刷视频", "status": "new", "source": "dsh-douyin-scroll", "default": "off", "download": "thirdparty", "notInV1": true, "note": "v1 不装；需先确认其许可证与是否允许被第三方安装器调用。" },
+        { "id": "E4", "name": "只读联网搜索", "status": "have", "source": "qq-bridge", "default": "on", "download": "" },
+        { "id": "E5", "name": "桌宠", "status": "have", "source": "surfpet", "default": "off", "download": "release" }
+      ]
+    },
+    {
+      "id": "F",
+      "name": "界面与运维",
+      "required": false,
+      "items": [
+        { "id": "F1", "name": "安装向导（本程序）", "status": "new", "source": "self", "default": "on", "download": "", "locked": "always" },
+        { "id": "F2", "name": "独立设置中心（本程序）", "status": "new", "source": "self", "default": "on", "download": "", "locked": "always" },
+        { "id": "F3", "name": "DSH 设置页（14 标签）", "status": "have", "source": "surfcore", "default": "on", "download": "" },
+        { "id": "F4", "name": "浏览器控制台 :3100", "status": "have", "source": "surfcore", "default": "off", "download": "" },
+        { "id": "F5", "name": "自检 / 诊断 / ACL 修复", "status": "have", "source": "surfcore", "default": "on", "download": "" },
+        { "id": "F6", "name": "组件与更新检查", "status": "have", "source": "surfcore", "default": "on", "download": "" },
+        { "id": "F7", "name": "开机自启", "status": "new", "source": "self", "default": "off", "download": "", "note": "要写计划任务，默认关闭；开了以后卸载要记得撤。" },
+        { "id": "F8", "name": "卸载（三档）", "status": "default-off", "source": "self", "default": "on", "download": "" }
+      ]
+    }
+  ]
+}

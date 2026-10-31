@@ -1,0 +1,22 @@
+# 运行时产物（安装状态、日志、下载缓存、已装的组件）
+data/
+cache/
+dist/
+
+# 依赖
+node_modules/
+
+# 日志与临时
+*.log
+*.tmp
+install-state.json
+
+# 本地环境变量
+.env
+.env.local
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

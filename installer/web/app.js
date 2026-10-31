@@ -382,17 +382,35 @@ function renderSnowLuma() {
         「通过自动化脚本部署」列为需事先书面授权的事。
       </div>
       <ol class="note" style="margin:0 0 12px 18px;padding:0;line-height:1.9">
-        <li>点「下载 Windows 包」→ 等浏览器下完（约 41 MB）</li>
-        <li>右键解压到 <code>D:\\SnowLuma</code>（或任意目录），别解压到压缩包里直接双击</li>
-        <li>双击里面的 <code>launcher.bat</code> → <b>扫码登录 QQ</b></li>
-        <li>回到这里点「我解压好了，选目录」</li>
+        <li>点「一键下载并解压」→ 等它跑完（约 41 MB，30–90 秒）<br/>
+            <span class="note">会解压到 <code>${esc(S.snow?.destDir ?? '安装目录旁')}</code></span></li>
+        <li>双击解压出来的 <code>launcher.bat</code> → <b>扫码登录 QQ</b></li>
+        <li>回来点「再找一次」，或直接用（路径已经写进配置）</li>
       </ol>
-      <p><button class="btn primary" id="sl-dl">下载 Windows 包</button>
-         <button class="btn" id="sl-pick">我解压好了，选目录</button>
-         <button class="btn" id="sl-again">再找一次</button></p>
+      <p><button class="btn primary" id="sl-fetch">一键下载并解压</button>
+         <button class="btn" id="sl-dl">只给我下载链接</button>
+         <button class="btn" id="sl-pick">我会自己解压，选目录</button></p>
       <p class="note" id="sl-info"></p>`;
 
   $('#sl-latest')?.addEventListener('click', () => window.open('https://github.com/SnowLuma/SnowLuma/releases/latest', '_blank', 'noopener'));
+
+  // 一键获取：下载 + 解压（不启动、不登录）
+  $('#sl-fetch')?.addEventListener('click', async () => {
+    if (!window.confirm('将从官方地址下载 SnowLuma 并解压到安装目录旁边，不会启动它。\n\n这一步由你本人发起；继续？')) return;
+    const info = $('#sl-info');
+    const btn = $('#sl-fetch');
+    if (btn) btn.disabled = true;
+    if (info) info.textContent = '正在下载并解压（约 41 MB，30–90 秒），别关这个页面…';
+    try {
+      const r = await api('/api/snowluma/fetch', { method: 'POST', body: {} });
+      S.state.config.snowluma.homeDir = r.found.dir;
+      S.state.config.snowluma.launcherPath = r.found.launcher ?? '';
+      await refreshSnowLuma(r.found.dir);
+    } catch (error) {
+      if (info) info.textContent = `失败：${error.message}`;
+      if (btn) btn.disabled = false;
+    }
+  });
 
   // 下载：先问服务端「最新版里哪个资产对」，再打开直链让浏览器自己下
   $('#sl-dl')?.addEventListener('click', async () => {

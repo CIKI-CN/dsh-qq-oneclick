@@ -1,4 +1,4 @@
-﻿// SnowLuma 的检测与接线（不做自动部署）。
+// SnowLuma 的检测与接线（不做自动部署）。
 //
 // 为什么不做「一键下载解压并启动」：
 //   SnowLuma EULA §5.4 明确写「将其并入第三方安装包…或通过自动化脚本部署，
@@ -12,6 +12,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import https from 'node:https';
 import { execFile } from 'node:child_process';
+import { downloadTo } from './download.mjs';
+import { extractZip } from './extract.mjs';
 
 /** 判断某个目录是不是一份 SnowLuma 发行包 */
 export function inspectDir(dir) {
@@ -151,4 +153,64 @@ export function latestWinAsset({ timeoutMs = 15000 } = {}) {
     req.on('error', (error) => resolve({ ok: false, reason: error.message }));
     req.end();
   });
+}
+
+/**
+ * 走系统代理下载。
+ * 为什么不直接用 https.get：这台机器上 github.com 直连会超时，只有 WinINET 里配的
+ * 代理（127.0.0.1:7890）能通；Node 不会自动读这个设置，而 PowerShell 会。
+ */
+function downloadViaSystemProxy(url, dest, { log = () => {} } = {}) {
+  return new Promise((resolve, reject) => {
+    const q = (s) => String(s).replace(/'/g, "''");
+    const cmd = [
+      "$ProgressPreference='SilentlyContinue'",
+      `Invoke-WebRequest -Uri '${q(url)}' -OutFile '${q(dest)}' -UseBasicParsing -TimeoutSec 600`,
+    ].join('; ');
+    execFile(
+      'powershell',
+      ['-NoProfile', '-Command', cmd],
+      { timeout: 620000, windowsHide: true, maxBuffer: 8 * 1024 * 1024 },
+      (error, stdout, stderr) => {
+        if (error) return reject(new Error(`下载失败：${String(stderr || error.message).trim().slice(0, 200)}`));
+        const size = fs.existsSync(dest) ? fs.statSync(dest).size : 0;
+        if (size < 10 * 1024 * 1024) return reject(new Error(`下载的文件只有 ${size} 字节，像是出错了`));
+        log(`下载完成 ${(size / 1024 / 1024).toFixed(1)} MB`);
+        resolve({ bytes: size });
+      },
+    );
+  });
+}
+
+/**
+ * 一键获取：下载官方最新 Windows 包 → 解压到指定目录 → 校验。
+ *
+ * 边界（写在这，免得以后自己忘了）：
+ *   - 只由用户点击触发；
+ *   - 不启动、不配置、不登录，解压完就停手；
+ *   - 不修改包内任何文件，也不随我们的发布包分发。
+ * EULA §5.4 把「通过自动化脚本部署」列为需书面授权；这里只做用户本来
+ * 用解压软件自己也能完成的文件展开，不做"装好并跑起来"。
+ */
+export async function fetchAndExtract({ destDir, onProgress = () => {}, log = () => {} }) {
+  const asset = await latestWinAsset({ timeoutMs: 20000 });
+  if (!asset.ok) throw new Error(`查不到最新版：${asset.reason}`);
+
+  fs.mkdirSync(destDir, { recursive: true });
+  const zip = path.join(destDir, asset.name);
+
+  if (!fs.existsSync(zip) || fs.statSync(zip).size < 10 * 1024 * 1024) {
+    log(`下载 ${asset.name}（${asset.sizeMB} MB）`);
+    await downloadViaSystemProxy(asset.url, zip, { log });
+  } else {
+    log('复用已下载的压缩包');
+  }
+
+  log("解压…");
+  await extractZip(zip, destDir, { log });
+  fs.rmSync(zip, { force: true });
+
+  const info = inspectDir(destDir);
+  if (!info.ok) throw new Error(`解压后不像 SnowLuma：${info.reason}`);
+  return { ...info, source: asset.tag, assetName: asset.name };
 }

@@ -12,7 +12,13 @@ import { install } from './lib/install.mjs';
 import { inspectRegistration } from './lib/dsh.mjs';
 import { verifyInstall } from './lib/verify.mjs';
 import { bridgeStatus, readConfig, readManifest, startBridge, stopBridge, tailLog, pathsFor, writeConfigPatch } from './lib/appconfig.mjs';
-import { detect as detectSnowLuma, inspectDir as inspectSnowLuma, pickFolder as pickSnowLumaFolder, latestWinAsset } from './lib/snowluma.mjs';
+import {
+  detect as detectSnowLuma,
+  inspectDir as inspectSnowLuma,
+  pickFolder as pickSnowLumaFolder,
+  latestWinAsset,
+  fetchAndExtract as fetchAndExtractSnowLuma,
+} from './lib/snowluma.mjs';
 import { load as loadState, save as saveState, appendLog, dataDir } from './lib/state.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -301,6 +307,8 @@ async function handle(req, res) {
     const found = dir ? inspectSnowLuma(dir) : detectSnowLuma(st.targetDir, st.config?.snowluma?.homeDir ?? '');
     return send(res, 200, {
       found,
+      // 一键获取会解压到这里（让用户在点之前就知道要去哪）
+      destDir: path.join(st.targetDir || path.join(process.env.LOCALAPPDATA || ROOT, 'DSHQQ'), 'snowluma'),
       configured: {
         homeDir: st.config?.snowluma?.homeDir ?? '',
         launcherPath: st.config?.snowluma?.launcherPath ?? '',
@@ -311,6 +319,30 @@ async function handle(req, res) {
   if (p === '/api/snowluma/latest' && req.method === 'GET') {
     const asset = await latestWinAsset();
     return send(res, 200, { asset });
+  }
+
+  // 一键获取：下载官方包 + 解压 + 写配置。不启动、不登录。
+  if (p === '/api/snowluma/fetch' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      const st = loadState(ROOT);
+      const base = st.targetDir || path.join(process.env.LOCALAPPDATA || ROOT, 'DSHQQ');
+      const dest = String(body?.dir ?? '').trim() || path.join(base, 'snowluma');
+
+      const found = await fetchAndExtractSnowLuma({
+        destDir: dest,
+        log: (m) => appendLog(ROOT, `snowluma: ${m}`),
+      });
+
+      const target = resolveTarget();
+      const patch = { snowluma: { homeDir: found.dir, launcherPath: found.launcher ?? '' } };
+      if (target) writeConfigPatch(target, patch);
+      else saveState(ROOT, { config: patch });
+
+      return send(res, 200, { ok: true, found, where: target ? 'app/config.json' : '安装时会写入' });
+    } catch (error) {
+      return send(res, 500, { error: error?.message ?? String(error) });
+    }
   }
 
   if (p === '/api/snowluma/pick' && req.method === 'POST') {

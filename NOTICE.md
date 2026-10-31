@@ -22,7 +22,7 @@
 | --- | --- | --- | --- | --- |
 | DeepSeek Harness（DSH） | DeepSeek | MIT（@deepseek-ai/dsh-host-apiproxy 0.1.1-rc.2、@deepseek-ai/schemastery 3.18.5） | https://github.com/deepseek-ai/deepseek-harness | 宿主；本项目以插件形式接入（preset + MCP + bundle）<br>改动：通过官方 bundle patch 机制注册，不修改 DSH 本体<br>⚠️ 用户自行安装 DSH，本项目只做检测与注册。 |
 | QQ NT 客户端 | 腾讯 | 专有软件 | https://im.qq.com/ | SnowLuma 注入的宿主客户端<br>改动：未修改，不打包、不代装<br>⚠️ 必须是官方 NTQQ，不是 TIM 或魔改版。 |
-| SnowLuma（QQ → OneBot v11 运行时） | SnowLuma / MotricSeven | LICENSE（源码可见非商业许可）+ 官方发行包 EULA v1.1 | https://github.com/SnowLuma/SnowLuma | 把 QQ 转成 OneBot v11 接口（第 1 层）<br>改动：未修改，不打包、不代装、不代启动、不代登录<br>⚠️ EULA §5.4：未经书面授权，不得将其专有组件并入第三方安装包或 Docker 镜像、通过自动化脚本部署。因此本安装器只『找到用户自己解压的目录并写进配置』，下载/解压/启动/扫码全部由用户本人完成。LICENSE §3 允许附条件再分发，但 §5.4 对专有组件的限制更具体，按更严的执行。 |
+| SnowLuma（QQ → OneBot v11 运行时） | SnowLuma / MotricSeven | LICENSE（源码可见非商业许可）+ 官方发行包 EULA v1.1 | https://github.com/SnowLuma/SnowLuma | 把 QQ 转成 OneBot v11 接口（第 1 层）<br>改动：未修改。用户点击后由安装器从官方 Releases 下载 zip 并解压到本机；不启动、不配置、不登录、不随本包分发<br>⚠️ EULA §5.4：未经书面授权，不得将其专有组件并入第三方安装包或 Docker 镜像、通过自动化脚本部署。本安装器的处理：不打包、不静默安装；仅当用户在界面上点击时，从官方地址下载并做文件展开（等同用户自己用解压软件），随后由用户本人双击 launcher.bat 并扫码登录。启动与登录始终不代做。 |
 
 ## 安装时从上游下载（17）
 

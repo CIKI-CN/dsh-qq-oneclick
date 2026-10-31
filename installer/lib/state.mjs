@@ -23,7 +23,7 @@ function defaults() {
       ownerQQ: '',
       groups: [],
       privates: [],
-      snowluma: { wsUrl: 'ws://127.0.0.1:3001', httpUrl: 'http://127.0.0.1:3000', accessToken: '' },
+      snowluma: { wsUrl: 'ws://127.0.0.1:3001', httpUrl: 'http://127.0.0.1:3000', accessToken: '', homeDir: '', launcherPath: '' },
       consoleToken: '',
     },
     detect: null,

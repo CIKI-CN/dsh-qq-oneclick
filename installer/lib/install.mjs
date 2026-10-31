@@ -48,6 +48,9 @@ export function buildConfigPatch(minimal = {}) {
       httpUrl: minimal.snowluma.httpUrl,
       accessToken: minimal.snowluma.accessToken,
     };
+    // 用户自己解压的 SnowLuma 目录（我们不下载、不部署，只帮他记住路径）
+    if (minimal.snowluma.homeDir) patch.snowluma.homeDir = minimal.snowluma.homeDir;
+    if (minimal.snowluma.launcherPath) patch.snowluma.launcherPath = minimal.snowluma.launcherPath;
   }
   if (minimal.consoleToken) patch.consoleToken = minimal.consoleToken;
   return patch;

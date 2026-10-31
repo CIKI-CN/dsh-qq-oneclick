@@ -20,3 +20,10 @@ install-state.json
 .idea/
 Thumbs.db
 desktop.ini
+
+# 安装包/镜像（项目目录里不该提交这些）
+*.msi
+*.exe
+*.dmg
+*.pkg
+*.iso

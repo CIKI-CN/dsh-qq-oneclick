@@ -282,6 +282,10 @@ function renderConfig() {
     <h1>配置</h1>
     <p class="lead">只填你最清楚的四件事。其余几百个键都有默认值，装完在设置中心改。</p>
 
+    <h2>SnowLuma（QQ 接入运行时）</h2>
+    <div id="sl"><p class="note">正在查找…</p></div>
+
+    <h2>你的信息</h2>
     <div class="field">
       <label>你的 QQ 号（只接受这个人的管理指令）</label>
       <input id="ownerQQ" value="${esc(c.ownerQQ)}" placeholder="例如 1000000001" inputmode="numeric" />
@@ -298,6 +302,7 @@ function renderConfig() {
       </div>
     </div>
 
+    <h2>连接</h2>
     <div class="row">
       <div class="field">
         <label>SnowLuma WS 地址</label>
@@ -338,6 +343,70 @@ function renderConfig() {
   bind('httpUrl', (v) => (S.state.config.snowluma.httpUrl = v));
   bind('accessToken', (v) => (S.state.config.snowluma.accessToken = v));
   bind('consoleToken', (v) => (S.state.config.consoleToken = v));
+
+  refreshSnowLuma();
+}
+
+// —— SnowLuma：只找路径、记路径；不代下载、不代部署（EULA §5.4）——
+async function refreshSnowLuma(dir) {
+  const box = $('#sl');
+  if (!box) return;
+  box.innerHTML = '<p class="note">正在查找 SnowLuma…</p>';
+  try {
+    S.snow = await api(`/api/snowluma${dir ? `?dir=${encodeURIComponent(dir)}` : ''}`);
+  } catch (error) {
+    box.innerHTML = `<p class="fix">查询失败：${esc(error.message)}</p>`;
+    return;
+  }
+  renderSnowLuma();
+}
+
+function renderSnowLuma() {
+  const box = $('#sl');
+  if (!box) return;
+  const f = S.snow?.found;
+
+  box.innerHTML = f?.ok
+    ? `
+      <div class="banner" style="border-color:var(--ok);color:var(--ok)">
+        已找到 SnowLuma ${esc(f.version ?? '')}：<code>${esc(f.dir)}</code>
+      </div>
+      <p class="note">装的时候会把这个路径写进配置，你不用再手填。扫码登录仍然要你自己打开 SnowLuma 完成。</p>
+      <p><button class="btn" id="sl-again">重新查找</button>
+         <button class="btn" id="sl-pick">换个目录</button>
+         <button class="btn" id="sl-dl">官方下载页</button></p>`
+    : `
+      <div class="banner">
+        还没找到 SnowLuma。你需要自己去官方 Releases 下载 Windows 包并解压——
+        我们不会替你下载/安装：SnowLuma EULA §5.4 把「通过自动化脚本部署」列为需事先书面授权的事。
+      </div>
+      <p><button class="btn primary" id="sl-dl">打开官方下载页</button>
+         <button class="btn" id="sl-pick">我解压好了，选目录</button>
+         <button class="btn" id="sl-again">再找一次</button></p>`;
+
+  $('#sl-dl')?.addEventListener('click', () =>
+    window.open('https://github.com/SnowLuma/SnowLuma/releases/latest', '_blank', 'noopener'),
+  );
+  $('#sl-again')?.addEventListener('click', () => refreshSnowLuma());
+  $('#sl-pick')?.addEventListener('click', async () => {
+    const box2 = $('#sl');
+    box2.innerHTML = '<p class="note">请在弹出的窗口里选择 SnowLuma 目录（有 index.mjs 的那一层）…</p>';
+    try {
+      const { picked } = await api('/api/snowluma/pick', { method: 'POST', body: {} });
+      if (!picked?.ok) {
+        box2.innerHTML = `<div class="banner">${esc(picked?.reason ?? '没选到可用的目录')}</div>`;
+        setTimeout(renderSnowLuma, 1200);
+        return;
+      }
+      await api('/api/snowluma/apply', { method: 'POST', body: { dir: picked.dir } });
+      S.state.config.snowluma.homeDir = picked.dir;
+      S.state.config.snowluma.launcherPath = picked.launcher ?? '';
+      await refreshSnowLuma(picked.dir);
+    } catch (error) {
+      box2.innerHTML = `<p class="fix">选择失败：${esc(error.message)}</p>`;
+      setTimeout(renderSnowLuma, 1200);
+    }
+  });
 }
 
 // —— 第 5 步：确认并安装 ——

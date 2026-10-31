@@ -12,6 +12,7 @@ import { install } from './lib/install.mjs';
 import { inspectRegistration } from './lib/dsh.mjs';
 import { verifyInstall } from './lib/verify.mjs';
 import { bridgeStatus, readConfig, readManifest, startBridge, stopBridge, tailLog, pathsFor, writeConfigPatch } from './lib/appconfig.mjs';
+import { detect as detectSnowLuma, inspectDir as inspectSnowLuma, pickFolder as pickSnowLumaFolder } from './lib/snowluma.mjs';
 import { load as loadState, save as saveState, appendLog, dataDir } from './lib/state.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -291,6 +292,47 @@ async function handle(req, res) {
     if (!target) return send(res, 404, { error: 'no-install' });
     const lines = Math.min(Number(url.searchParams.get('lines') ?? 120) || 120, 400);
     return send(res, 200, { log: tailLog(target, lines) });
+  }
+
+  // —— SnowLuma 检测与接线（只找路径、写配置，不自动下载/部署）——
+  if (p === '/api/snowluma' && req.method === 'GET') {
+    const st = loadState(ROOT);
+    const dir = url.searchParams.get('dir') || st.config?.snowluma?.homeDir || '';
+    const found = dir ? inspectSnowLuma(dir) : detectSnowLuma(st.targetDir, st.config?.snowluma?.homeDir ?? '');
+    return send(res, 200, {
+      found,
+      configured: {
+        homeDir: st.config?.snowluma?.homeDir ?? '',
+        launcherPath: st.config?.snowluma?.launcherPath ?? '',
+      },
+    });
+  }
+
+  if (p === '/api/snowluma/pick' && req.method === 'POST') {
+    const picked = await pickSnowLumaFolder();
+    return send(res, 200, { picked });
+  }
+
+  if (p === '/api/snowluma/apply' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      const dir = String(body?.dir ?? '').trim();
+      const found = inspectSnowLuma(dir);
+      if (!found.ok) return send(res, 400, { error: 'invalid-dir', message: found.reason });
+
+      // 已装：直接写进 app/config.json；没装：先记在向导状态里，装的时候一起写
+      const target = resolveTarget();
+      if (target) {
+        writeConfigPatch(target, {
+          snowluma: { homeDir: found.dir, launcherPath: found.launcher ?? '' },
+        });
+        return send(res, 200, { ok: true, where: 'app/config.json', found });
+      }
+      saveState(ROOT, { config: { snowluma: { homeDir: found.dir, launcherPath: found.launcher ?? '' } } });
+      return send(res, 200, { ok: true, where: '安装时会写入', found });
+    } catch (error) {
+      return send(res, 400, { error: error?.message ?? 'bad request' });
+    }
   }
 
   // —— DSH 现状探测（确认页要知道「会注册到哪、现在是谁」）——

@@ -41,13 +41,13 @@
       "name": "SnowLuma（QQ → OneBot v11 运行时）",
       "upstream": "https://github.com/SnowLuma/SnowLuma",
       "author": "SnowLuma / MotricSeven",
-      "license": "见上游 EULA（未随 npm 包提供全文）",
+      "license": "LICENSE（源码可见非商业许可）+ 官方发行包 EULA v1.1",
       "licenseUrl": "https://github.com/SnowLuma/SnowLuma",
       "inclusion": "user-provided",
       "usedFor": "把 QQ 转成 OneBot v11 接口（第 1 层）",
-      "modified": "未修改，不打包、不代装、不代登录",
+      "modified": "未修改，不打包、不代装、不代启动、不代登录",
       "versionPin": "latest",
-      "notice": "上游 EULA §5.4 限制再分发，本项目仅检测已安装实例并引导用户自行获取。"
+      "notice": "EULA §5.4：未经书面授权，不得将其专有组件并入第三方安装包或 Docker 镜像、通过自动化脚本部署。因此本安装器只『找到用户自己解压的目录并写进配置』，下载/解压/启动/扫码全部由用户本人完成。LICENSE §3 允许附条件再分发，但 §5.4 对专有组件的限制更具体，按更严的执行。"
     },
     {
       "id": "snowluma-sdk",

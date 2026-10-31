@@ -1,4 +1,4 @@
-// DSH一键式接入QQ — 本地安装向导服务（零依赖）
+﻿// DSH一键式接入QQ — 本地安装向导服务（零依赖）
 // 只监听 127.0.0.1，不写注册表，不需要管理员。关掉进程就什么都不留。
 
 import fs from 'node:fs';
@@ -12,7 +12,7 @@ import { install } from './lib/install.mjs';
 import { inspectRegistration } from './lib/dsh.mjs';
 import { verifyInstall } from './lib/verify.mjs';
 import { bridgeStatus, readConfig, readManifest, startBridge, stopBridge, tailLog, pathsFor, writeConfigPatch } from './lib/appconfig.mjs';
-import { detect as detectSnowLuma, inspectDir as inspectSnowLuma, pickFolder as pickSnowLumaFolder } from './lib/snowluma.mjs';
+import { detect as detectSnowLuma, inspectDir as inspectSnowLuma, pickFolder as pickSnowLumaFolder, latestWinAsset } from './lib/snowluma.mjs';
 import { load as loadState, save as saveState, appendLog, dataDir } from './lib/state.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -306,6 +306,11 @@ async function handle(req, res) {
         launcherPath: st.config?.snowluma?.launcherPath ?? '',
       },
     });
+  }
+
+  if (p === '/api/snowluma/latest' && req.method === 'GET') {
+    const asset = await latestWinAsset();
+    return send(res, 200, { asset });
   }
 
   if (p === '/api/snowluma/pick' && req.method === 'POST') {

@@ -1,6 +1,6 @@
 {
   "name": "dsh-qq-oneclick",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "description": "DSH一键式接入QQ — 非官方一键安装器：本地 Web 向导 + 功能勾选 + 设置中心",

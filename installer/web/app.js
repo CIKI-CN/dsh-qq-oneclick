@@ -374,19 +374,44 @@ function renderSnowLuma() {
       <p class="note">装的时候会把这个路径写进配置，你不用再手填。扫码登录仍然要你自己打开 SnowLuma 完成。</p>
       <p><button class="btn" id="sl-again">重新查找</button>
          <button class="btn" id="sl-pick">换个目录</button>
-         <button class="btn" id="sl-dl">官方下载页</button></p>`
+         <button class="btn" id="sl-latest">查看最新版</button></p>`
     : `
       <div class="banner">
-        还没找到 SnowLuma。你需要自己去官方 Releases 下载 Windows 包并解压——
-        我们不会替你下载/安装：SnowLuma EULA §5.4 把「通过自动化脚本部署」列为需事先书面授权的事。
+        还没找到 SnowLuma。点下面的按钮，浏览器会<b>直接开始下载正确的那一个包</b>（Windows x64 完整版，
+        不是 lite、不是 linux）。下载后的解压和启动由你自己完成——SnowLuma EULA §5.4 把
+        「通过自动化脚本部署」列为需事先书面授权的事。
       </div>
-      <p><button class="btn primary" id="sl-dl">打开官方下载页</button>
+      <ol class="note" style="margin:0 0 12px 18px;padding:0;line-height:1.9">
+        <li>点「下载 Windows 包」→ 等浏览器下完（约 41 MB）</li>
+        <li>右键解压到 <code>D:\\SnowLuma</code>（或任意目录），别解压到压缩包里直接双击</li>
+        <li>双击里面的 <code>launcher.bat</code> → <b>扫码登录 QQ</b></li>
+        <li>回到这里点「我解压好了，选目录」</li>
+      </ol>
+      <p><button class="btn primary" id="sl-dl">下载 Windows 包</button>
          <button class="btn" id="sl-pick">我解压好了，选目录</button>
-         <button class="btn" id="sl-again">再找一次</button></p>`;
+         <button class="btn" id="sl-again">再找一次</button></p>
+      <p class="note" id="sl-info"></p>`;
 
-  $('#sl-dl')?.addEventListener('click', () =>
-    window.open('https://github.com/SnowLuma/SnowLuma/releases/latest', '_blank', 'noopener'),
-  );
+  $('#sl-latest')?.addEventListener('click', () => window.open('https://github.com/SnowLuma/SnowLuma/releases/latest', '_blank', 'noopener'));
+
+  // 下载：先问服务端「最新版里哪个资产对」，再打开直链让浏览器自己下
+  $('#sl-dl')?.addEventListener('click', async () => {
+    const info = $('#sl-info');
+    if (info) info.textContent = '正在查最新版本…';
+    try {
+      const { asset } = await api('/api/snowluma/latest');
+      if (!asset?.ok) {
+        if (info) info.textContent = `${asset?.reason ?? '查不到'}，已打开 Releases 页面让你自己挑`;
+        window.open('https://github.com/SnowLuma/SnowLuma/releases/latest', '_blank', 'noopener');
+        return;
+      }
+      if (info) info.textContent = `${asset.tag} · ${asset.name} · ${asset.sizeMB} MB —— 已在新标签页开始下载`;
+      window.open(asset.url, '_blank', 'noopener');
+    } catch (error) {
+      if (info) info.textContent = `查询失败：${error.message}，已打开 Releases 页面`;
+      window.open('https://github.com/SnowLuma/SnowLuma/releases/latest', '_blank', 'noopener');
+    }
+  });
   $('#sl-again')?.addEventListener('click', () => refreshSnowLuma());
   $('#sl-pick')?.addEventListener('click', async () => {
     const box2 = $('#sl');
